@@ -41,15 +41,23 @@ public class UserAdapter extends AbstractUserAdapterFederatedStorage {
   private String keycloakId;
 
   private Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
-    put("firstName", User::getFirstName);
-    put("lastName", User::getLastName);
     put("displayName", User::getDisplayName);
   }};
 
   public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User entity) {
     super(session, realm, model);
     this.entity = entity;
-    keycloakId = StorageId.keycloakId(model, entity.getExternalId());
+    keycloakId = StorageId.keycloakId(model, entity.getName());
+  }
+
+  @Override
+  public String getFirstName() {
+    return entity.getFirstName();
+  }
+
+  @Override
+  public String getLastName(){
+    return entity.getLastName();
   }
 
   @Override

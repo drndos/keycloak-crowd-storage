@@ -213,7 +213,7 @@ public class CrowdUserStorageProvider implements
     }
 
     UserCredentialModel cred = (UserCredentialModel) input;
-    logger.info("Is user valid ? " + user.getUsername() + " " + cred.getValue());
+    logger.info("Is user valid ? " + user.getUsername());
     try {
       User authenticatedUser = client.authenticateUser(user.getUsername(), cred.getValue());
       return authenticatedUser != null;

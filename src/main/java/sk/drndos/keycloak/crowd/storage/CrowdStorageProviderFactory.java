@@ -50,8 +50,7 @@ public class CrowdStorageProviderFactory implements UserStorageProviderFactory<C
         .helpText("Application name registered in Crowd server")
         .add()
         .property().name("applicationPassword")
-        //TODO: password type
-        .type(ProviderConfigProperty.STRING_TYPE)
+        .type(ProviderConfigProperty.PASSWORD)
         .label("Crowd Application Password")
         .helpText("Application password registered in Crowd server")
         .add()
