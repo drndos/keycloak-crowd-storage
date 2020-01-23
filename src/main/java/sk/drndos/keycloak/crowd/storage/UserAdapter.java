@@ -17,11 +17,13 @@
 package sk.drndos.keycloak.crowd.storage;
 
 import com.atlassian.crowd.model.user.User;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
 import org.jboss.logging.Logger;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.component.ComponentModel;
@@ -36,92 +38,92 @@ import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
  */
 public class UserAdapter extends AbstractUserAdapterFederatedStorage {
 
-  private static final Logger logger = Logger.getLogger(UserAdapter.class);
-  private User entity;
-  private String keycloakId;
+    private static final Logger logger = Logger.getLogger(UserAdapter.class);
+    private User entity;
+    private String keycloakId;
 
-  private Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
-    put("displayName", User::getDisplayName);
-  }};
+    private Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
+        put("displayName", User::getDisplayName);
+    }};
 
-  public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User entity) {
-    super(session, realm, model);
-    this.entity = entity;
-    keycloakId = StorageId.keycloakId(model, entity.getName());
-  }
-
-  @Override
-  public String getFirstName() {
-    return entity.getFirstName();
-  }
-
-  @Override
-  public String getLastName(){
-    return entity.getLastName();
-  }
-
-  @Override
-  public String getUsername() {
-    return entity.getName();
-  }
-
-  @Override
-  public void setUsername(String username) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  @Override
-  public void setEmail(String email) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  @Override
-  public String getEmail() {
-    return entity.getEmailAddress();
-  }
-
-  @Override
-  public String getId() {
-    return keycloakId;
-  }
-
-  @Override
-  public void setSingleAttribute(String name, String value) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  @Override
-  public void removeAttribute(String name) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  @Override
-  public void setAttribute(String name, List<String> values) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  @Override
-  public String getFirstAttribute(String name) {
-    return attributeFunctions.getOrDefault(name, key -> super.getFirstAttribute(name)).apply(entity);
-  }
-
-  @Override
-  public Map<String, List<String>> getAttributes() {
-    Map<String, List<String>> attrs = super.getAttributes();
-    MultivaluedHashMap<String, String> all = new MultivaluedHashMap<>();
-    all.putAll(attrs);
-    attributeFunctions.forEach((key, value) -> all.add(key, value.apply(entity)));
-    return all;
-  }
-
-  @Override
-  public List<String> getAttribute(String name) {
-    if (attributeFunctions.containsKey(name)) {
-      List<String> listOfAttribute = new LinkedList<>();
-      listOfAttribute.add(attributeFunctions.get(name).apply(entity));
-      return listOfAttribute;
-    } else {
-      return super.getAttribute(name);
+    public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User entity) {
+        super(session, realm, model);
+        this.entity = entity;
+        keycloakId = StorageId.keycloakId(model, entity.getName());
     }
-  }
+
+    @Override
+    public String getFirstName() {
+        return entity.getFirstName();
+    }
+
+    @Override
+    public String getLastName() {
+        return entity.getLastName();
+    }
+
+    @Override
+    public String getUsername() {
+        return entity.getName();
+    }
+
+    @Override
+    public void setUsername(String username) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void setEmail(String email) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public String getEmail() {
+        return entity.getEmailAddress();
+    }
+
+    @Override
+    public String getId() {
+        return keycloakId;
+    }
+
+    @Override
+    public void setSingleAttribute(String name, String value) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void setAttribute(String name, List<String> values) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public String getFirstAttribute(String name) {
+        return attributeFunctions.getOrDefault(name, key -> super.getFirstAttribute(name)).apply(entity);
+    }
+
+    @Override
+    public Map<String, List<String>> getAttributes() {
+        Map<String, List<String>> attrs = super.getAttributes();
+        MultivaluedHashMap<String, String> all = new MultivaluedHashMap<>();
+        all.putAll(attrs);
+        attributeFunctions.forEach((key, value) -> all.add(key, value.apply(entity)));
+        return all;
+    }
+
+    @Override
+    public List<String> getAttribute(String name) {
+        if (attributeFunctions.containsKey(name)) {
+            List<String> listOfAttribute = new LinkedList<>();
+            listOfAttribute.add(attributeFunctions.get(name).apply(entity));
+            return listOfAttribute;
+        } else {
+            return super.getAttribute(name);
+        }
+    }
 }
