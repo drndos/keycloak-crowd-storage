@@ -1,86 +1,86 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>sk.drndos.keycloak.crowd</groupId>
-  <artifactId>crowd-user-storage</artifactId>
-  <version>1.0.0.RELEASE</version>
-  <packaging>jar</packaging>
-  <name>Keycloak Crowd User Storage</name>
-  <description>Keycloak Crowd User Storage</description>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>sk.drndos.keycloak.crowd</groupId>
+    <artifactId>crowd-user-storage</artifactId>
+    <version>1.0.0.RELEASE</version>
+    <packaging>jar</packaging>
+    <name>Keycloak Crowd User Storage</name>
+    <description>Keycloak Crowd User Storage</description>
 
-  <properties>
-    <version.compiler.maven.plugin>3.5.1</version.compiler.maven.plugin>
-    <version.wildfly.maven.plugin>1.2.2.Final</version.wildfly.maven.plugin>
-  </properties>
+    <properties>
+        <version.compiler.maven.plugin>3.5.1</version.compiler.maven.plugin>
+        <version.wildfly.maven.plugin>1.2.2.Final</version.wildfly.maven.plugin>
+    </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.atlassian.crowd.client</groupId>
-      <artifactId>atlassian-crowd-rest-client</artifactId>
-      <version>1.4</version>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.atlassian.crowd.client</groupId>
+            <artifactId>atlassian-crowd-rest-client</artifactId>
+            <version>1.4</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-core</artifactId>
-      <version>6.0.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-server-spi</artifactId>
-      <version>6.0.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging</artifactId>
-      <version>3.3.2.Final</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+            <version>8.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-server-spi</artifactId>
+            <version>8.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.3.2.Final</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+ 
+    <build>
+        <finalName>crowd-user-storage</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${version.compiler.maven.plugin}</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>${version.wildfly.maven.plugin}</version>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <!-- Run shade goal on package phase -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-  <build>
-    <finalName>crowd-user-storage</finalName>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${version.compiler.maven.plugin}</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.wildfly.plugins</groupId>
-        <artifactId>wildfly-maven-plugin</artifactId>
-        <version>${version.wildfly.maven.plugin}</version>
-        <configuration>
-          <skip>false</skip>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <!-- Run shade goal on package phase -->
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
-  <repositories>
-    <repository>
-      <id>atlassian-public</id>
-      <url>https://maven.atlassian.com/repository/public</url>
-    </repository>
-  </repositories>
+    <repositories>
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://maven.atlassian.com/repository/public</url>
+        </repository>
+    </repositories>
 </project>
