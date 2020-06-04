@@ -19,6 +19,7 @@ package sk.drndos.keycloak.crowd.storage;
 
 import com.atlassian.crowd.model.user.User;
 import com.atlassian.crowd.search.query.entity.restriction.MatchMode;
+import com.atlassian.crowd.search.query.entity.restriction.NullRestriction;
 import com.atlassian.crowd.search.query.entity.restriction.Property;
 import com.atlassian.crowd.search.query.entity.restriction.PropertyImpl;
 import com.atlassian.crowd.search.query.entity.restriction.PropertyRestriction;
@@ -34,7 +35,6 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputUpdater;
 import org.keycloak.credential.CredentialInputValidator;
-import org.keycloak.credential.CredentialModel;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -114,7 +114,7 @@ public class CrowdUserStorageProvider implements
 
   @Override
   public List<UserModel> getUsers(RealmModel realm, int firstResult, int maxResults) {
-    throw new UnsupportedOperationException("Not supported by Crowd");
+    return searchForAllUsers(realm, firstResult, maxResults);
   }
 
   // UserQueryProvider method implementations
@@ -127,10 +127,10 @@ public class CrowdUserStorageProvider implements
   @Override
   public List<UserModel> searchForUser(String search, RealmModel realm, int firstResult, int maxResults) {
     try {
-      return client.searchUsers(new PropertyRestriction() {
+      return client.searchUsers(new PropertyRestriction<String>() {
         @Override
-        public Property getProperty() {
-          return new PropertyImpl("name", String.class);
+        public Property<String> getProperty() {
+          return new PropertyImpl<>("name", String.class);
         }
 
         @Override
@@ -139,7 +139,7 @@ public class CrowdUserStorageProvider implements
         }
 
         @Override
-        public Object getValue() {
+        public String getValue() {
           return search;
         }
       }, firstResult, maxResults)
@@ -160,7 +160,24 @@ public class CrowdUserStorageProvider implements
 
   @Override
   public List<UserModel> searchForUser(Map<String, String> params, RealmModel realm, int firstResult, int maxResults) {
+    if (params.isEmpty()) {
+      return searchForAllUsers(realm, firstResult, maxResults);
+    }
+    logger.info("Unsupported search for user with params " + params);
     throw new UnsupportedOperationException("Not supported by Crowd");
+  }
+
+  private List<UserModel> searchForAllUsers(RealmModel realm, int firstResult, int maxResults) {
+    try {
+      return client.searchUsers(new NullRestriction() {
+      }, firstResult, maxResults)
+          .stream()
+          .map(user -> new UserAdapter(session, realm, model, user))
+          .collect(Collectors.toList());
+    } catch (Exception e) {
+      logger.info(e);
+      return null;
+    }
   }
 
   @Override
