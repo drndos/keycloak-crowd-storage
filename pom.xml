@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>sk.drndos.keycloak.crowd</groupId>
   <artifactId>crowd-user-storage</artifactId>
-  <version>1.0.0.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <packaging>jar</packaging>
   <name>Keycloak Crowd User Storage</name>
   <description>Keycloak Crowd User Storage</description>
@@ -11,6 +11,7 @@
   <properties>
     <version.compiler.maven.plugin>3.5.1</version.compiler.maven.plugin>
     <version.wildfly.maven.plugin>1.2.2.Final</version.wildfly.maven.plugin>
+    <version.keycloak>10.0.2</version.keycloak>
   </properties>
 
   <dependencies>
@@ -23,13 +24,13 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-core</artifactId>
-      <version>6.0.1</version>
+      <version>${version.keycloak}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
-      <version>6.0.1</version>
+      <version>${version.keycloak}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

@@ -37,10 +37,10 @@ import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
 public class UserAdapter extends AbstractUserAdapterFederatedStorage {
 
   private static final Logger logger = Logger.getLogger(UserAdapter.class);
-  private User entity;
-  private String keycloakId;
+  private final User entity;
+  private final String keycloakId;
 
-  private Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
+  private final Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
     put("displayName", User::getDisplayName);
   }};
 

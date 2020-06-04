@@ -40,6 +40,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.user.UserLookupProvider;
@@ -58,9 +59,9 @@ public class CrowdUserStorageProvider implements
 
   public static final String UNSET_PASSWORD = "#$!-UNSET-PASSWORD";
 
-  private KeycloakSession session;
-  private CrowdClient client;
-  private ComponentModel model;
+  private final KeycloakSession session;
+  private final CrowdClient client;
+  private final ComponentModel model;
   // map of loaded users in this transaction
   protected Map<String, UserModel> loadedUsers = new HashMap<>();
 
@@ -203,7 +204,7 @@ public class CrowdUserStorageProvider implements
   @Override
   public boolean supportsCredentialType(String credentialType) {
     logger.info("Does realm support ? " + credentialType);
-    return credentialType.equals(CredentialModel.PASSWORD);
+    return credentialType.equals(PasswordCredentialModel.TYPE);
   }
 
   @Override
