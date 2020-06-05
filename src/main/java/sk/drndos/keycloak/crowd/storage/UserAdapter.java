@@ -16,15 +16,21 @@
  */
 package sk.drndos.keycloak.crowd.storage;
 
+import static java.util.stream.Collectors.toSet;
+
 import com.atlassian.crowd.model.user.User;
+import com.atlassian.crowd.service.client.CrowdClient;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import org.jboss.logging.Logger;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.component.ComponentModel;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.storage.StorageId;
@@ -39,15 +45,19 @@ public class UserAdapter extends AbstractUserAdapterFederatedStorage {
   private static final Logger logger = Logger.getLogger(UserAdapter.class);
   private final User entity;
   private final String keycloakId;
+  private final CrowdClient client;
+  private final ComponentModel model;
 
   private final Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
     put("displayName", User::getDisplayName);
   }};
 
-  public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User entity) {
+  public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User entity, CrowdClient client) {
     super(session, realm, model);
     this.entity = entity;
     keycloakId = StorageId.keycloakId(model, entity.getName());
+    this.client = client;
+    this.model = model;
   }
 
   @Override
@@ -56,7 +66,7 @@ public class UserAdapter extends AbstractUserAdapterFederatedStorage {
   }
 
   @Override
-  public String getLastName(){
+  public String getLastName() {
     return entity.getLastName();
   }
 
@@ -122,6 +132,19 @@ public class UserAdapter extends AbstractUserAdapterFederatedStorage {
       return listOfAttribute;
     } else {
       return super.getAttribute(name);
+    }
+  }
+
+  @Override
+  protected Set<GroupModel> getGroupsInternal() {
+    logger.info("Getting groups Internal for user " + this.getId());
+    try {
+      return client.getGroupsForUser(CrowdUserStorageProvider.idToUsername(this.getId()), 0, 1000).stream()
+          .map(g -> new GroupAdapter(g, client, model))
+          .collect(toSet());
+    } catch (Exception e) {
+      logger.info(e);
+      return null;
     }
   }
 }

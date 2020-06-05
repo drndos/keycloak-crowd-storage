@@ -79,20 +79,22 @@ public class CrowdUserStorageProvider implements
     logger.info("Getting user by username " + username);
     try {
       User user = client.getUser(username);
-      return new UserAdapter(session, realm, model, user);
+      return new UserAdapter(session, realm, model, user, client);
     } catch (Exception e) {
       logger.info(e);
       return null;
     }
   }
 
+  public static String idToUsername(String id) {
+    StorageId storageId = new StorageId(id);
+    return storageId.getExternalId();
+  }
 
   @Override
   public UserModel getUserById(String id, RealmModel realm) {
     logger.info("Getting user by id " + id);
-    StorageId storageId = new StorageId(id);
-    String username = storageId.getExternalId();
-    return getUserByUsername(username, realm);
+    return getUserByUsername(idToUsername(id), realm);
   }
 
   @Override
@@ -144,7 +146,7 @@ public class CrowdUserStorageProvider implements
         }
       }, firstResult, maxResults)
           .stream()
-          .map(user -> new UserAdapter(session, realm, model, user))
+          .map(user -> new UserAdapter(session, realm, model, user, client))
           .collect(Collectors.toList());
 
     } catch (Exception e) {
@@ -172,7 +174,7 @@ public class CrowdUserStorageProvider implements
       return client.searchUsers(new NullRestriction() {
       }, firstResult, maxResults)
           .stream()
-          .map(user -> new UserAdapter(session, realm, model, user))
+          .map(user -> new UserAdapter(session, realm, model, user, client))
           .collect(Collectors.toList());
     } catch (Exception e) {
       logger.info(e);

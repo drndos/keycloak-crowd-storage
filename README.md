@@ -31,3 +31,20 @@ Enable the Provider for a Realm
 Login to the <span>Keycloak</span> Admin Console and got to the User Federation tab.   You should now see your deployed providers in the add-provider list box.
 
 For the `crowd` provider, you will have to specify Crowd server base URL, application name and password.
+
+Enable userFederatedStorage SPI
+-------------------------------
+Open standalone/configuration/standalone.xml
+Find
+```
+            <spi name="userCache">
+                <provider name="default" enabled="true"/>
+            </spi>    
+```
+After add
+```
+            <spi name="userFederatedStorage">
+                <default-provider>crowd-rest</default-provider>
+            </spi> 
+```
+You will need to deploy this jar before the configuration change or before configuration actual application
