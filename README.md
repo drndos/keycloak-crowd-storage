@@ -13,18 +13,14 @@ System Requirements
 
 You need to have <span>Keycloak</span> running.
 
-All you need to build this project is Java 8.0 (Java SDK 1.8) or later and Maven 3.1.1 or later.
+All you need to build this project is Java 17.0 (Java SDK 17) or later and Maven 3.10.1 or later.
 
 
 Build and Deploy the library
 -------------------------------
 
-To deploy this provider you must have <span>Keycloak</span> running in standalone or standalone-ha mode. Then type the follow maven command:
+To deploy this provider you must have <span>Keycloak</span> running. Then copy Jar to providers directory.
 
-   ````
-   mvn clean install wildfly:deploy
-   ````
-If you want to play with and modify the example, simply rerun the maven deploy command above and the new version will be hot deployed.
 
 Enable the Provider for a Realm
 -------------------------------

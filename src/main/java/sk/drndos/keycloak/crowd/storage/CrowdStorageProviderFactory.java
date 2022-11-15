@@ -20,7 +20,7 @@ package sk.drndos.keycloak.crowd.storage;
 import com.atlassian.crowd.integration.rest.service.factory.RestCrowdClientFactory;
 import com.atlassian.crowd.service.client.CrowdClient;
 import java.util.List;
-import org.jboss.logging.Logger;
+import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.component.ComponentValidationException;
 import org.keycloak.models.KeycloakSession;
@@ -29,9 +29,8 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
 import org.keycloak.storage.UserStorageProviderFactory;
 
+@JBossLog
 public class CrowdStorageProviderFactory implements UserStorageProviderFactory<CrowdUserStorageProvider> {
-
-  private static final Logger logger = Logger.getLogger(CrowdStorageProviderFactory.class);
 
   public static final String PROVIDER_NAME = "crowd";
 

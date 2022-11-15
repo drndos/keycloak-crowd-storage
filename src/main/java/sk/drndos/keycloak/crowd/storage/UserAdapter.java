@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import org.jboss.logging.Logger;
+import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
@@ -34,13 +34,13 @@ import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
  * @version $Revision: 1 $
  */
+@JBossLog
 public class UserAdapter extends AbstractUserAdapterFederatedStorage {
 
-  private static final Logger logger = Logger.getLogger(UserAdapter.class);
   private final User entity;
   private final String keycloakId;
 
-  private final Map<String, Function<User, String>> attributeFunctions = new HashMap<String, Function<User, String>>() {{
+  private final Map<String, Function<User, String>> attributeFunctions = new HashMap<>() {{
     put("displayName", User::getDisplayName);
   }};
 

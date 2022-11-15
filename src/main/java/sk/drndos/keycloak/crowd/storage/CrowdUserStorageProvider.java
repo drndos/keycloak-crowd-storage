@@ -24,13 +24,10 @@ import com.atlassian.crowd.search.query.entity.restriction.Property;
 import com.atlassian.crowd.search.query.entity.restriction.PropertyImpl;
 import com.atlassian.crowd.search.query.entity.restriction.PropertyRestriction;
 import com.atlassian.crowd.service.client.CrowdClient;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.jboss.logging.Logger;
+import java.util.stream.Stream;
+import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputUpdater;
@@ -47,6 +44,7 @@ import org.keycloak.storage.user.UserLookupProvider;
 import org.keycloak.storage.user.UserQueryProvider;
 import org.keycloak.storage.user.UserRegistrationProvider;
 
+@JBossLog
 public class CrowdUserStorageProvider implements
     UserStorageProvider,
     UserLookupProvider,
@@ -54,8 +52,6 @@ public class CrowdUserStorageProvider implements
     CredentialInputUpdater,
     UserRegistrationProvider,
     UserQueryProvider {
-
-  private static final Logger logger = Logger.getLogger(CrowdUserStorageProvider.class);
 
   public static final String UNSET_PASSWORD = "#$!-UNSET-PASSWORD";
 
@@ -66,7 +62,8 @@ public class CrowdUserStorageProvider implements
   protected Map<String, UserModel> loadedUsers = new HashMap<>();
 
 
-  public CrowdUserStorageProvider(KeycloakSession session, ComponentModel model, CrowdClient client) {
+  public CrowdUserStorageProvider(KeycloakSession session, ComponentModel model,
+      CrowdClient client) {
     this.session = session;
     this.model = model;
     this.client = client;
@@ -75,28 +72,27 @@ public class CrowdUserStorageProvider implements
   // UserLookupProvider methods
 
   @Override
-  public UserModel getUserByUsername(String username, RealmModel realm) {
-    logger.info("Getting user by username " + username);
+  public UserModel getUserByUsername(RealmModel realm, String username) {
+    log.info("Getting user by username " + username);
     try {
       User user = client.getUser(username);
       return new UserAdapter(session, realm, model, user);
     } catch (Exception e) {
-      logger.info(e);
+      log.info(e);
       return null;
     }
   }
 
-
   @Override
-  public UserModel getUserById(String id, RealmModel realm) {
-    logger.info("Getting user by id " + id);
+  public UserModel getUserById(RealmModel realm, String id) {
+    log.info("Getting user by id " + id);
     StorageId storageId = new StorageId(id);
     String username = storageId.getExternalId();
-    return getUserByUsername(username, realm);
+    return getUserByUsername(realm, username);
   }
 
   @Override
-  public UserModel getUserByEmail(String email, RealmModel realm) {
+  public UserModel getUserByEmail(RealmModel realm, String email) {
     throw new UnsupportedOperationException("Not supported by Crowd");
   }
 
@@ -108,94 +104,64 @@ public class CrowdUserStorageProvider implements
   }
 
   @Override
-  public List<UserModel> getUsers(RealmModel realm) {
-    return getUsers(realm, 0, Integer.MAX_VALUE);
-  }
-
-  @Override
-  public List<UserModel> getUsers(RealmModel realm, int firstResult, int maxResults) {
-    return searchForAllUsers(realm, firstResult, maxResults);
-  }
-
-  // UserQueryProvider method implementations
-
-  @Override
-  public List<UserModel> searchForUser(String search, RealmModel realm) {
-    return searchForUser(search, realm, 0, Integer.MAX_VALUE);
-  }
-
-  @Override
-  public List<UserModel> searchForUser(String search, RealmModel realm, int firstResult, int maxResults) {
-    try {
-      return client.searchUsers(new PropertyRestriction<String>() {
-        @Override
-        public Property<String> getProperty() {
-          return new PropertyImpl<>("name", String.class);
-        }
-
-        @Override
-        public MatchMode getMatchMode() {
-          return MatchMode.CONTAINS;
-        }
-
-        @Override
-        public String getValue() {
-          return search;
-        }
-      }, firstResult, maxResults)
-          .stream()
-          .map(user -> new UserAdapter(session, realm, model, user))
-          .collect(Collectors.toList());
-
-    } catch (Exception e) {
-      logger.info(e);
-      return null;
-    }
-  }
-
-  @Override
-  public List<UserModel> searchForUser(Map<String, String> params, RealmModel realm) {
-    return searchForUser(params, realm, 0, Integer.MAX_VALUE);
-  }
-
-  @Override
-  public List<UserModel> searchForUser(Map<String, String> params, RealmModel realm, int firstResult, int maxResults) {
+  public Stream<UserModel> searchForUserStream(RealmModel realm, Map<String, String> params,
+      Integer firstResult, Integer maxResults) {
     if (params.isEmpty()) {
-      return searchForAllUsers(realm, firstResult, maxResults);
+      try {
+        return client.searchUsers(new NullRestriction() {
+            }, firstResult, maxResults)
+            .stream()
+            .map(user -> new UserAdapter(session, realm, model, user));
+      } catch (Exception e) {
+        log.info(e);
+        return null;
+      }
     }
-    logger.info("Unsupported search for user with params " + params);
+    log.info("Unsupported search for user with params " + params);
     throw new UnsupportedOperationException("Not supported by Crowd");
   }
 
-  private List<UserModel> searchForAllUsers(RealmModel realm, int firstResult, int maxResults) {
+  @Override
+  public Stream<UserModel> getGroupMembersStream(RealmModel realm, GroupModel group,
+      Integer firstResult, Integer maxResults) {
+    // runtime automatically handles querying UserFederatedStorage
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<UserModel> searchForUserByUserAttributeStream(RealmModel realm, String attrName,
+      String attrValue) {
+    // runtime automatically handles querying UserFederatedStorage
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer firstResult,
+      Integer maxResults) {
     try {
-      return client.searchUsers(new NullRestriction() {
-      }, firstResult, maxResults)
+      return client.searchUsers(new PropertyRestriction<String>() {
+            @Override
+            public Property<String> getProperty() {
+              return new PropertyImpl<>("name", String.class);
+            }
+
+            @Override
+            public MatchMode getMatchMode() {
+              return MatchMode.CONTAINS;
+            }
+
+            @Override
+            public String getValue() {
+              return search;
+            }
+          }, firstResult, maxResults)
           .stream()
-          .map(user -> new UserAdapter(session, realm, model, user))
-          .collect(Collectors.toList());
+          .map(user -> new UserAdapter(session, realm, model, user));
+
     } catch (Exception e) {
-      logger.info(e);
+      log.info(e);
       return null;
     }
-  }
-
-  @Override
-  public List<UserModel> getGroupMembers(RealmModel realm, GroupModel group, int firstResult, int maxResults) {
-    // runtime automatically handles querying UserFederatedStorage
-    return Collections.EMPTY_LIST;
-  }
-
-  @Override
-  public List<UserModel> getGroupMembers(RealmModel realm, GroupModel group) {
-    // runtime automatically handles querying UserFederatedStorage
-    return Collections.EMPTY_LIST;
-  }
-
-  @Override
-  public List<UserModel> searchForUserByUserAttribute(String attrName, String attrValue, RealmModel realm) {
-    // runtime automatically handles querying UserFederatedStorage
-    return Collections.EMPTY_LIST;
   }
 
   // UserRegistrationProvider method implementations
@@ -214,29 +180,28 @@ public class CrowdUserStorageProvider implements
 
   @Override
   public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
-    logger.info("Is user " + user.getUsername() + " configured for ? " + credentialType);
+    log.info("Is user " + user.getUsername() + " configured for ? " + credentialType);
     return supportsCredentialType(credentialType);
   }
 
   @Override
   public boolean supportsCredentialType(String credentialType) {
-    logger.info("Does realm support ? " + credentialType);
+    log.info("Does realm support ? " + credentialType);
     return credentialType.equals(PasswordCredentialModel.TYPE);
   }
 
   @Override
   public boolean isValid(RealmModel realm, UserModel user, CredentialInput input) {
-    if (!supportsCredentialType(input.getType()) || !(input instanceof UserCredentialModel)) {
+    if (!supportsCredentialType(input.getType()) || !(input instanceof UserCredentialModel cred)) {
       return false;
     }
 
-    UserCredentialModel cred = (UserCredentialModel) input;
-    logger.info("Is user valid ? " + user.getUsername());
+    log.info("Is user valid ? " + user.getUsername());
     try {
       User authenticatedUser = client.authenticateUser(user.getUsername(), cred.getValue());
       return authenticatedUser != null;
     } catch (Exception e) {
-      logger.info(e);
+      log.info(e);
       return false;
     }
   }
@@ -254,9 +219,8 @@ public class CrowdUserStorageProvider implements
   }
 
   @Override
-  public Set<String> getDisableableCredentialTypes(RealmModel realm, UserModel user) {
-
-    return Collections.emptySet();
+  public Stream<String> getDisableableCredentialTypesStream(RealmModel realm, UserModel user) {
+    return Stream.empty();
   }
 
   @Override
