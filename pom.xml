@@ -11,7 +11,7 @@
   <properties>
     <version.compiler.maven.plugin>3.10.1</version.compiler.maven.plugin>
     <version.shade.maven.plugin>3.4.1</version.shade.maven.plugin>
-    <version.keycloak>20.0.1</version.keycloak>
+    <version.keycloak>20.0.3</version.keycloak>
     <version.crowd-client>1.4</version.crowd-client>
     <version.lombok>1.18.24</version.lombok>
   </properties>
